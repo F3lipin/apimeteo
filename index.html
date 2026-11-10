@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Meteo</title>
+
+  <!-- Fontes -->
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Bibliotecas -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+
+  <!-- SDKs da plataforma (necessários para o histórico de consultas) -->
+  <script src="/_sdk/46f7aaa18b973e86.telemetry_sdk.js" integrity="sha512-tmC41I8mDdEafKYU+uonPpd7aBUtaIPoM9H0Xlc3Wj30p0LomIF0JGMdxKeUubA3EOw0urN6S0qCEPV/0N3wGw=="></script>
+  <script src="/_sdk/0da7f84bd43207b9.data_sdk.js" integrity="sha512-idGAwBQRLg5Uj/GS6M9mupKjxya8dbnuORMMHhuMClWxJFWZlnL9TyVsM+GPKk/XuFWksgp7olXXcO+XRn9b+A=="></script>
+  <script src="/_sdk/c4fa4592f8c578fe.editing_sdk.js" integrity="sha512-nTs53cR0YFGgsMPSjIh9nn31iguDN1RlI0srrn6cP/X0WOxai/2uAL1Pb1JwUqlvUILKM03xdXI1tVOAlAzxZQ=="></script>
+  <script src="/_sdk/61fda7eb7851041c.resizing_sdk.js" integrity="sha512-cP0WZPfVzPHNvtR9pZK9ltVQtIGnBaug7fVmtFl3R8ZSeEE73PquJeDrgIImGj0sPiyxGc6oJJYIgfuo/KyACg=="></script>
+</head>
+
+<body data-template-id="__page-root" style="background: rgb(234, 243, 246);">
+  <div class="app-shell">
+    <div class="max-w-6xl mx-auto px-4 sm:px-7 py-7 sm:py-10">
+
+      <!-- ============ Cabeçalho ============ -->
+      <header class="flex flex-wrap items-center justify-between gap-5 mb-7">
+        <div>
+          <p data-template-id="brand-kicker" class="canva-text uppercase tracking-[.23em] font-bold mb-1" style="color: rgb(22, 115, 155); font-weight: 700; font-style: normal; font-size: 11px;">PAINEL METEOROLÓGICO</p>
+          <h1 data-template-id="brand-title" class="canva-text font-bold leading-tight" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 32px;">API Meteo</h1>
+          <p data-template-id="brand-subtitle" class="canva-text mt-2" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 16px;">O tempo em cada lugar, com contexto e clareza.</p>
+        </div>
+        <span data-template-id="demo-badge" class="canva-tag rounded-full px-4 py-2 font-semibold" style="background: rgb(217, 237, 243); color: rgb(23, 111, 148); font-weight: 400; font-style: normal; font-size: 11px;">● MODO DEMONSTRAÇÃO</span>
+      </header>
+
+      <!-- ============ Navegação ============ -->
+      <nav aria-label="Áreas do aplicativo" class="flex flex-wrap gap-2 mb-7">
+        <button type="button" data-view="consulta" aria-selected="true" data-template-id="nav-consulta" class="canva-button nav-button rounded-xl px-5 py-3 font-semibold" style="background: rgb(23, 111, 148); color: rgb(255, 255, 255); font-weight: 400; font-style: normal; font-size: 16px;">Consulta</button>
+        <button type="button" data-view="comparacao" aria-selected="false" data-template-id="nav-comparacao" class="canva-button nav-button rounded-xl px-5 py-3 font-semibold" style="background: rgb(255, 255, 255); color: rgb(23, 54, 74); font-weight: 400; font-style: normal; font-size: 16px;">Comparação</button>
+        <button type="button" data-view="arquitetura" aria-selected="false" data-template-id="nav-arquitetura" class="canva-button nav-button rounded-xl px-5 py-3 font-semibold" style="background: rgb(255, 255, 255); color: rgb(23, 54, 74); font-weight: 400; font-style: normal; font-size: 16px;">Arquitetura e testes</button>
+      </nav>
+
+      <main>
+
+        <!-- ============ Aba: Consulta ============ -->
+        <section id="consulta" class="view rise" aria-label="Consulta meteorológica">
+
+          <!-- Busca -->
+          <div data-template-id="search-panel" class="canva-panel surface p-5 sm:p-6 mb-5" style="background: rgb(255, 255, 255);">
+            <h2 data-template-id="search-heading" class="canva-text font-bold mb-3" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 24px;">Encontre uma cidade</h2>
+            <form id="search-form" class="flex flex-col sm:flex-row gap-3">
+              <div class="flex-1">
+                <label for="city-input" data-template-id="city-label" class="canva-text block font-semibold mb-2" style="color: rgb(23, 54, 74); font-weight: 400; font-style: normal; font-size: 13px;">Cidade ou região</label>
+                <input id="city-input" data-template-id="city-placeholder" class="canva-input w-full rounded-xl border border-[#d6e5ea] px-4 py-3 bg-white" autocomplete="off" placeholder="Ex.: Salvador, Recife ou Lisboa" style="color: rgb(23, 54, 74); font-weight: 400; font-style: normal; font-size: 16px;">
+              </div>
+              <button id="search-button" type="submit" data-template-id="search-button-label" class="canva-button rounded-xl px-6 py-3 font-bold self-end w-full sm:w-auto" style="background: rgb(23, 111, 148); color: rgb(255, 255, 255); font-weight: 400; font-style: normal; font-size: 16px;">Buscar cidade</button>
+            </form>
+            <p id="search-status" role="status" aria-live="polite" class="mt-3 text-sm text-[#657f8e]"></p>
+            <div id="search-results" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-3" aria-label="Localidades encontradas"></div>
+          </div>
+
+          <!-- Conteúdo do clima (exibido após a consulta) -->
+          <div id="weather-content" hidden>
+
+            <!-- Condições atuais -->
+            <article data-template-id="current-panel" class="canva-card surface p-5 sm:p-7 mb-5 rise" style="background: rgb(255, 255, 255);">
+              <div class="flex flex-wrap justify-between items-start gap-4">
+                <div>
+                  <p data-template-id="current-kicker" class="canva-text uppercase tracking-[.19em] font-bold mb-1" style="color: rgb(22, 115, 155); font-weight: 400; font-style: normal; font-size: 10px;">CONDIÇÕES ATUAIS · SIMULAÇÃO</p>
+                  <h2 id="current-place" class="font-bold text-[clamp(1.5rem,3vw,2.25rem)]"></h2>
+                  <p id="coordinates" class="text-sm text-[#698394] mt-2"></p>
+                  <p id="observed" class="text-sm text-[#698394] mt-1"></p>
+                </div>
+                <button id="refresh-button" type="button" data-template-id="refresh-label" class="canva-button rounded-lg px-4 py-2 border font-semibold" style="background: rgb(255, 255, 255); color: rgb(23, 111, 148); font-weight: 400; font-style: normal; font-size: 16px;">↻ Atualizar dados</button>
+              </div>
+
+              <div class="grid md:grid-cols-[.8fr_1.2fr] gap-6 items-center mt-7">
+                <div class="flex items-center gap-5">
+                  <div id="current-icon" class="text-6xl" aria-hidden="true"></div>
+                  <div>
+                    <div id="current-temp" class="text-6xl font-semibold tracking-tight"></div>
+                    <p id="current-description" class="text-sm font-semibold mt-2"></p>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <div class="soft p-3">
+                    <p data-template-id="humidity-label" class="canva-text" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 11px;">Umidade</p>
+                    <strong id="humidity-value"></strong>
+                  </div>
+                  <div class="soft p-3">
+                    <p data-template-id="wind-label" class="canva-text" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 11px;">Vento · direção</p>
+                    <strong id="wind-value"></strong>
+                  </div>
+                  <div class="soft p-3">
+                    <p data-template-id="feels-label" class="canva-text" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 11px;">Sensação térmica</p>
+                    <strong id="feels-value"></strong>
+                  </div>
+                  <div class="soft p-3">
+                    <p data-template-id="rain-label" class="canva-text" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 11px;">Precipitação</p>
+                    <strong id="rain-value"></strong>
+                  </div>
+                  <div class="soft p-3">
+                    <p data-template-id="uv-label" class="canva-text" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 11px;">Índice UV</p>
+                    <strong id="uv-value"></strong>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <!-- Previsão e gráfico -->
+            <div class="grid lg:grid-cols-2 gap-5">
+              <section data-template-id="forecast-panel" class="canva-panel surface p-5 sm:p-6" style="background: rgb(255, 255, 255);">
+                <h2 data-template-id="forecast-heading" class="canva-text font-bold mb-5" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 24px;">Próximos 5 dias</h2>
+                <div id="forecast-cards" class="forecast-grid"></div>
+              </section>
+
+              <section data-template-id="chart-panel" class="canva-panel surface p-5 sm:p-6" style="background: rgb(255, 255, 255);">
+                <h2 data-template-id="chart-heading" class="canva-text font-bold mb-5" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 24px;">Temperaturas por dia</h2>
+                <div class="relative h-64">
+                  <canvas id="temperature-chart" role="img" aria-label="Gráfico de temperaturas máximas e mínimas dos próximos cinco dias"></canvas>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- Histórico -->
+          <aside data-template-id="history-panel" class="canva-panel surface p-5 sm:p-6 mt-5" style="background: rgb(255, 255, 255);">
+            <h2 data-template-id="history-heading" class="canva-text font-bold mb-2" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 24px;">Consultas recentes</h2>
+            <p id="history-status" role="status" class="text-sm text-[#698394] mb-3"></p>
+            <div id="history-list" class="flex flex-wrap gap-2"></div>
+          </aside>
+        </section>
+
+        <!-- ============ Aba: Comparação ============ -->
+        <section id="comparacao" class="view rise" hidden aria-label="Comparação de cidades">
+          <div data-template-id="compare-panel" class="canva-panel surface p-5 sm:p-7" style="background: rgb(255, 255, 255);">
+            <h2 data-template-id="compare-heading" class="canva-text font-bold" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 24px;">Compare duas cidades</h2>
+            <p data-template-id="compare-intro" class="canva-text mt-2 mb-6" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 16px;">Consulte uma cidade primeiro. Depois, escolha outra para comparar as temperaturas dos próximos cinco dias.</p>
+
+            <div class="flex flex-wrap gap-3 items-end">
+              <div class="flex-1 min-w-[220px]">
+                <label for="compare-select" data-template-id="compare-label" class="canva-text font-semibold block mb-2" style="color: rgb(23, 54, 74); font-weight: 400; font-style: normal; font-size: 13px;">Segunda cidade</label>
+                <select id="compare-select" class="w-full border border-[#d6e5ea] rounded-xl px-4 py-3 bg-white"></select>
+              </div>
+              <button type="button" id="compare-button" data-template-id="compare-button-label" class="canva-button rounded-xl px-5 py-3 font-bold" style="background: rgb(23, 111, 148); color: rgb(255, 255, 255); font-weight: 400; font-style: normal; font-size: 16px;">Comparar previsões</button>
+            </div>
+
+            <p id="compare-status" role="status" class="mt-3 text-sm text-[#698394]"></p>
+            <div id="compare-content" class="grid md:grid-cols-2 gap-4 mt-5" hidden></div>
+          </div>
+        </section>
+
+        <!-- ============ Aba: Arquitetura e testes ============ -->
+        <section id="arquitetura" class="view rise" hidden aria-label="Arquitetura e testes">
+          <div data-template-id="architecture-panel" class="canva-panel surface p-5 sm:p-7" style="background: rgb(255, 255, 255);">
+            <p data-template-id="architecture-kicker" class="canva-text uppercase tracking-[.19em] font-bold mb-2" style="color: rgb(22, 115, 155); font-weight: 400; font-style: normal; font-size: 11px;">POR TRÁS DO PAINEL</p>
+            <h2 data-template-id="architecture-heading" class="canva-text font-bold" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 24px;">Arquitetura e testes</h2>
+            <p data-template-id="architecture-intro" class="canva-text mt-3 mb-6" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 16px;">Interface → API Gateway → microsserviços independentes. Esta versão utiliza um adaptador local de demonstração; não há backend meteorológico ativo.</p>
+
+            <div class="grid md:grid-cols-3 gap-3 mb-6">
+              <div class="soft p-5">
+                <h3 data-template-id="gateway-title" class="canva-text font-bold" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 19px;">01 · API Gateway</h3>
+                <p data-template-id="gateway-copy" class="canva-text mt-2" style="color: rgb(85, 114, 133); font-weight: 400; font-style: normal; font-size: 14px;">Ponto único de entrada. Encaminha solicitações, padroniza respostas e concentra tratamento de falhas.</p>
+              </div>
+              <div class="soft p-5">
+                <h3 data-template-id="geo-title" class="canva-text font-bold" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 19px;">02 · Geocoding</h3>
+                <p data-template-id="geo-copy" class="canva-text mt-2" style="color: rgb(85, 114, 133); font-weight: 400; font-style: normal; font-size: 14px;">Busca localidades e retorna nome, estado, país e coordenadas. Resultados homônimos permanecem separados.</p>
+              </div>
+              <div class="soft p-5">
+                <h3 data-template-id="weather-title" class="canva-text font-bold" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 19px;">03 · Meteorologia</h3>
+                <p data-template-id="weather-copy" class="canva-text mt-2" style="color: rgb(85, 114, 133); font-weight: 400; font-style: normal; font-size: 14px;">Recebe coordenadas e retorna condições atuais, código WMO e máximas e mínimas de cinco dias.</p>
+              </div>
+            </div>
+
+            <h3 data-template-id="contract-heading" class="canva-text font-bold mb-2" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 19px;">Contrato de integração</h3>
+            <p data-template-id="contract-copy" class="canva-text mb-5" style="color: rgb(85, 114, 133); font-weight: 400; font-style: normal; font-size: 14px;">Configure uma URL HTTPS para o gateway no adaptador da aplicação. Rotas previstas: GET /geocoding/search?q=cidade → lista de localidades; GET /meteorologia/forecast?lat=…&amp;lon=… → observação e days[5]. O gateway encaminha cada rota ao respectivo microsserviço. Os serviços não estão implantados nesta demonstração.</p>
+
+            <h3 data-template-id="tests-heading" class="canva-text font-bold mb-2" style="color: rgb(23, 54, 74); font-weight: 700; font-style: normal; font-size: 19px;">Roteiro de testes · 20 requisitos</h3>
+            <p data-template-id="tests-copy" class="canva-text" style="color: rgb(85, 114, 133); font-weight: 400; font-style: normal; font-size: 14px;">Consulte Salvador; depois Rio de Janeiro, São Paulo e Recife; consulte Lisboa; verifique estado, país, coordenadas, horário, sensação, vento, UV, cinco dias, ícones WMO e gráfico. Teste entrada vazia, cidade inexistente e os dois resultados de “Salvador”. Compare cidades, atualize os dados e confira as últimas cinco consultas. Por fim, revise os contratos e a divisão gateway/geocoding/meteorologia acima. As consultas desta versão são simuladas: integração e testes de backend real dependem da implantação dos serviços.</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- ============ Rodapé ============ -->
+      <footer class="pt-7 text-center">
+        <p data-template-id="footer-note" class="canva-text" style="color: rgb(105, 131, 148); font-weight: 400; font-style: normal; font-size: 12px;">API Meteo · Dados meteorológicos simulados para demonstração, não adequados para decisões reais.</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Lógica da aplicação -->
+  <script src="script.js"></script>
+</body>
+</html>

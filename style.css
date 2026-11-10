@@ -1,0 +1,135 @@
+/* ==========================================================================
+   API Meteo — Estilos
+   Sumário:
+   1. Variáveis
+   2. Reset e base
+   3. Layout
+   4. Componentes (superfícies, navegação, botões, grade de previsão)
+   5. Estados e acessibilidade
+   6. Animações
+   7. Responsivo
+   ========================================================================== */
+
+
+/* 1. Variáveis
+   -------------------------------------------------------------------------- */
+:root {
+  --ink: #17364a;
+  --muted: #698394;
+  --line: #dce9ee;
+  --blue: #16739b;
+  --pale: #eaf3f6;
+}
+
+
+/* 2. Reset e base
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Libre Franklin', sans-serif;
+  color: var(--ink);
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: Fraunces, serif;
+}
+
+
+/* 3. Layout
+   -------------------------------------------------------------------------- */
+.app-shell {
+  width: 100%;
+  min-height: 100%;
+  background: linear-gradient(155deg, #e8f3f6, #f4f9fa 65%, #e9f3f5);
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+
+/* 4. Componentes
+   -------------------------------------------------------------------------- */
+
+/* Superfícies */
+.surface {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px #16435a0b;
+}
+
+.soft {
+  background: #edf4f6;
+  border-radius: 10px;
+}
+
+/* Navegação por abas */
+.nav-button[aria-selected="true"] {
+  background: #176f94;
+  color: white;
+}
+
+/* Botões de resultado e histórico */
+.result-button:hover,
+.history-button:hover {
+  background: #e8f3f7;
+}
+
+
+/* 5. Estados e acessibilidade
+   -------------------------------------------------------------------------- */
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #e9a35a;
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.view[hidden],
+[hidden] {
+  display: none !important;
+}
+
+
+/* 6. Animações
+   -------------------------------------------------------------------------- */
+.rise {
+  animation: rise .45s both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* 7. Responsivo
+   -------------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .forecast-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .forecast-grid > *:last-child {
+    grid-column: span 2;
+  }
+}
